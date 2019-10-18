@@ -1,4 +1,4 @@
-import { useQuery } from "@apollo/react-hooks";
+import { useMutation, useQuery } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import React from "react";
 
@@ -12,8 +12,15 @@ const ALL_PEOPLE = gql`
   }
 `;
 
+const MUTATION_QUERY = gql`
+  mutation {
+    removeTag(input: "asd", id: 1)
+  }
+`;
+
 export default function App() {
   const { loading, data } = useQuery(ALL_PEOPLE);
+  const [fun] = useMutation(MUTATION_QUERY);
 
   return (
     <main>
@@ -25,13 +32,35 @@ export default function App() {
       {loading ? (
         <p>Loading…</p>
       ) : (
-        <ul>
-          {data.people.map(person => (
-            <li key={person.id}>
-              {person.name} {(person.tags || []).join(", ")}
-            </li>
-          ))}
-        </ul>
+        <>
+          <ul>
+            {data.people.map(person => (
+              <li key={person.id}>
+                {person.name} {(person.tags || []).join(", ")}
+              </li>
+            ))}
+          </ul>
+          <button
+            onClick={e => {
+              e.preventDefault();
+              fun({
+                update: store => {
+                  const data = store.readQuery({ query: ALL_PEOPLE });
+                  store.writeQuery({
+                    query: ALL_PEOPLE,
+                    data: {
+                      people: data.people.map(
+                        p => (p.id == 2 ? p.tags.pop() && p : p)
+                      )
+                    }
+                  });
+                }
+              });
+            }}
+          >
+            Botun
+          </button>
+        </>
       )}
     </main>
   );
