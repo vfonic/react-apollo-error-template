@@ -1,21 +1,19 @@
-import React from "react";
 import { useQuery } from "@apollo/react-hooks";
 import gql from "graphql-tag";
+import React from "react";
 
 const ALL_PEOPLE = gql`
   query AllPeople {
     people {
       id
       name
+      tags
     }
   }
 `;
 
 export default function App() {
-  const {
-    loading,
-    data
-  } = useQuery(ALL_PEOPLE);
+  const { loading, data } = useQuery(ALL_PEOPLE);
 
   return (
     <main>
@@ -29,7 +27,9 @@ export default function App() {
       ) : (
         <ul>
           {data.people.map(person => (
-            <li key={person.id}>{person.name}</li>
+            <li key={person.id}>
+              {person.name} {(person.tags || []).join(", ")}
+            </li>
           ))}
         </ul>
       )}
